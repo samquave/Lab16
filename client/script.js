@@ -13,7 +13,7 @@ function postChirp() {
     var chirp = {
         message: $chirpInput.val(),
         user: 'Sam',
-       
+
     };
     $.ajax({
         method: 'POST',
@@ -42,6 +42,10 @@ function getChirps() {
             var $message = $('<p></p>');
             var $user = $('<h4></h4>');
             var $timestamp = $('<h5></h5>');
+            var $deleteBtn = $('<button id="delete-btn"><span class= "glyphicon glyphicon-trash"></span></button>');
+            $deleteBtn.click(deleteChirp);
+
+
 
             $message.text(chirps[i].message);
             $user.text(chirps[i].user);
@@ -49,8 +53,22 @@ function getChirps() {
             $message.appendTo($chirpDiv);
             $user.appendTo($chirpDiv);
             $timestamp.appendTo($chirpDiv);
-
+            $deleteBtn.appendTo($chirpDiv);
             $chirpDiv.appendTo($chirpList);
+
+            function deleteChirp() {
+                $.ajax({
+                    method: 'DELETE',
+                    url: '/api/chirps',
+                    
+                }).then(function () {
+                    
+                    $chirpDiv.remove();
+                }), function (err) {
+                    console.log(err);
+                }
+            }
+
 
 
         }
@@ -59,5 +77,10 @@ function getChirps() {
         console.log(err);
     });
 }
+
+
+
+
+
 
 getChirps();

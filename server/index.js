@@ -30,9 +30,9 @@ app.use(bodyParser.json());
 app.route('/api/chirps')
     .get(function (req, res) {
         getChirps()
-            .then(function(chirps) {
+            .then(function (chirps) {
                 res.send(chirps);
-            }), function(err) {
+            }), function (err) {
                 res.status(500).send(err);
             }
 
@@ -40,13 +40,20 @@ app.route('/api/chirps')
 
     }).post(function (req, res) {
         writeChirp(req.body.message, req.body.user, req.body.timestamp)
-            .then(function() {
+            .then(function () {
                 res.send();
-            }), function(err) {
+            }), function (err) {
                 res.status(500).send(err);
             }
 
-    });
+    }).delete(function (req, res) {
+        deleteChirp(req.body.id)
+            .then(function () {
+                res.send();
+            }), function (err) {
+                res.status(500).send(err);
+            }
+    })
 
 
 
@@ -55,16 +62,16 @@ app.listen(3000);
 
 
 function getChirps() {
-    return new Promise (function(fulfill, reject) {
-        pool.getConnection(function(err, connection) {
+    return new Promise(function (fulfill, reject) {
+        pool.getConnection(function (err, connection) {
             if (err) {
                 reject(err);
-            }else {
-                connection.query("CALL GetAllChirps();", function(err, resultsets) {
+            } else {
+                connection.query("CALL GetAllChirps();", function (err, resultsets) {
                     if (err) {
                         connection.release();
                         reject(err);
-                    }else {
+                    } else {
                         connection.release();
                         fulfill(resultsets[0]);
                     }
@@ -75,16 +82,36 @@ function getChirps() {
 }
 
 function writeChirp(messageVal, userVal, timestampVal) {
-    return new Promise ( function(fulfill, reject) {
-        pool.getConnection(function(err, connection) {
+    return new Promise(function (fulfill, reject) {
+        pool.getConnection(function (err, connection) {
             if (err) {
                 reject(err);
-            }else {
-                connection.query("CALL InsertChirp(?, ?, ?);", [messageVal, userVal, timestampVal], function(err, resultsets) {
+            } else {
+                connection.query("CALL InsertChirp(?, ?, ?);", [messageVal, userVal, timestampVal], function (err, resultsets) {
                     if (err) {
                         connection.release();
                         reject(err);
-                    }else {
+                    } else {
+                        connection.release();
+                        fulfill(resultsets[0]);
+                    }
+                });
+            }
+        });
+    });
+}
+
+function deleteChirp(idVal) {
+    return new Promise(function (fulfill, reject) {
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                reject(err);
+            } else {
+                connection.query("CALL DeleteChirp(?);", [idVal], function (err, resultsets) {
+                    if (err) {
+                        connection.release();
+                        reject(err);
+                    } else {
                         connection.release();
                         fulfill(resultsets[0]);
                     }
