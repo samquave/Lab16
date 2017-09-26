@@ -50,6 +50,7 @@ body {
 p {
     font-size: 2.5rem;
     text-align: center;
+    
 }
 
 h4 {
@@ -57,11 +58,13 @@ h4 {
     position: relative;
     left: .1rem;
     float: bottom;
+    text-decoration-color: green;
 }
 
 h5 {
     text-align: right;   
     position: relative;
     right: .5rem;
+    text-decoration-color: green;
  
 }

@@ -13,7 +13,7 @@ function postChirp() {
     var chirp = {
         message: $chirpInput.val(),
         user: 'Sam',
-        timestamp: new Date().toISOString()
+       
     };
     $.ajax({
         method: 'POST',

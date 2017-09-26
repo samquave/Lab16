@@ -6,8 +6,11 @@ var mysql = require('mysql');
 
 var pool = mysql.createPool({
     connectionLimit: 10,
-    host: ''
-})
+    host: 'localhost',
+    user: 'chirperuser',
+    password: 'chirppass',
+    database: 'Chirper'
+});
 
 
 
@@ -26,25 +29,22 @@ app.use(bodyParser.json());
 
 app.route('/api/chirps')
     .get(function (req, res) {
+        getChirps()
+            .then(function(chirps) {
+                res.send(chirps);
+            }), function(err) {
+                res.status(500).send(err);
+            }
 
-        res.sendFile(dataPath);
+
 
     }).post(function (req, res) {
-        var newChirp = req.body;
-        readFile(dataPath, 'utf8')
-            .then(function (fileContents) {
-
-                var chirps = JSON.parse(fileContents);
-
-                chirps.push(newChirp);
-                return writeFile(dataPath, JSON.stringify(chirps));
-
-            }).then(function () {
-                res.sendStatus(201);
-            }).catch(function (err) {
-                console.log(err);
-                res.sendStatus(500);
-            });
+        writeChirp(req.body.message, req.body.user, req.body.timestamp)
+            .then(function() {
+                res.send();
+            }), function(err) {
+                res.status(500).send(err);
+            }
 
     });
 
@@ -52,25 +52,43 @@ app.route('/api/chirps')
 
 app.listen(3000);
 
-function readFile(filePath, encoding) {
-    return new Promise(function (resolve, reject) {
-        fs.readFile(filePath, encoding, function (err, data) {
+
+
+function getChirps() {
+    return new Promise (function(fulfill, reject) {
+        pool.getConnection(function(err, connection) {
             if (err) {
                 reject(err);
-            } else {
-                resolve(data);
+            }else {
+                connection.query("CALL GetAllChirps();", function(err, resultsets) {
+                    if (err) {
+                        connection.release();
+                        reject(err);
+                    }else {
+                        connection.release();
+                        fulfill(resultsets[0]);
+                    }
+                });
             }
         });
     });
 }
 
-function writeFile(filePath, data) {
-    return new Promise(function (resolve, reject) {
-        fs.writeFile(filePath, data, function (err) {
+function writeChirp(messageVal, userVal, timestampVal) {
+    return new Promise ( function(fulfill, reject) {
+        pool.getConnection(function(err, connection) {
             if (err) {
-                reject(err)
-            } else {
-                resolve();
+                reject(err);
+            }else {
+                connection.query("CALL InsertChirp(?, ?, ?);", [messageVal, userVal, timestampVal], function(err, resultsets) {
+                    if (err) {
+                        connection.release();
+                        reject(err);
+                    }else {
+                        connection.release();
+                        fulfill(resultsets[0]);
+                    }
+                });
             }
         });
     });
