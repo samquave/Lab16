@@ -1,6 +1,7 @@
 var $submitBtn = $('#chirp-submit');
 var $chirpInput = $('#chirp-input-box');
 var $chirpList = $('#chirp-field');
+var $userDropdown = $('#dropdown');
 
 $submitBtn.click(postChirp);
 
@@ -12,7 +13,7 @@ $chirpInput.on('input', function () {
 function postChirp() {
     var chirp = {
         message: $chirpInput.val(),
-        user: 'Sam',
+        user: $userDropdown.val(),
 
     };
     $.ajax({
@@ -43,9 +44,7 @@ function getChirps() {
             var $user = $('<h4></h4>');
             var $timestamp = $('<h5></h5>');
             var $deleteBtn = $('<button id="delete-btn"><span class= "glyphicon glyphicon-trash"></span></button>');
-            $deleteBtn.click(deleteChirp);
-
-
+            // $deleteBtn.click(deleteChirp(chirps[i].id));
 
             $message.text(chirps[i].message);
             $user.text(chirps[i].user);
@@ -56,21 +55,6 @@ function getChirps() {
             $deleteBtn.appendTo($chirpDiv);
             $chirpDiv.appendTo($chirpList);
 
-            function deleteChirp() {
-                $.ajax({
-                    method: 'DELETE',
-                    url: '/api/chirps',
-                    
-                }).then(function () {
-                    
-                    $chirpDiv.remove();
-                }), function (err) {
-                    console.log(err);
-                }
-            }
-
-
-
         }
 
     }, function (err) {
@@ -78,7 +62,42 @@ function getChirps() {
     });
 }
 
+function getUsers() {
+    $.ajax({
+        method: 'GET',
+        url: '/api/users'
+    }).then(function (u) {
+        for (var i = 0; i < u.length; i++) {
 
+            var $userOption = $('<option value="' + u[i].Users + '">' + u[i].Users + '</option>');
+            
+            $userOption.text(u[i].Users);
+            $userOption.appendTo($userDropdown);
+
+        }
+    }, function (err) {
+        console.log(err);
+    })
+}
+
+getUsers();
+
+
+// function deleteChirp(id) {
+
+//     $.ajax({
+//         method: 'DELETE',
+//         url: '/api/chirps/' + id
+
+
+
+//     }).then(function () {
+//         getChirps();
+//         // $chirpDiv.remove();
+//     }), function (err) {
+//         console.log(err);
+//     }
+// }
 
 
 

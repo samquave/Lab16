@@ -24,7 +24,14 @@ app.use(bodyParser.json());
 
 
 
-
+app.get('/api/users', function(req, res){
+    getUsers()
+        .then(function (users) {
+            res.send(users);
+        }), function (err) {
+            res.status(500).send(err);
+        }
+})
 
 
 app.route('/api/chirps')
@@ -46,14 +53,16 @@ app.route('/api/chirps')
                 res.status(500).send(err);
             }
 
-    }).delete(function (req, res) {
-        deleteChirp(req.body.id)
-            .then(function () {
-                res.send();
-            }), function (err) {
-                res.status(500).send(err);
-            }
     })
+    
+// app.delete('/api/chirps/:id', function (req, res) {
+//         deleteChirp(req.body.id)
+//             .then(function () {
+//                 res.send();
+//             }), function (err) {
+//                 res.status(500).send(err);
+//             }
+//     })
 
 
 
@@ -108,6 +117,26 @@ function deleteChirp(idVal) {
                 reject(err);
             } else {
                 connection.query("CALL DeleteChirp(?);", [idVal], function (err, resultsets) {
+                    if (err) {
+                        connection.release();
+                        reject(err);
+                    } else {
+                        connection.release();
+                        fulfill(resultsets[0]);
+                    }
+                });
+            }
+        });
+    });
+}
+
+function getUsers() {
+    return new Promise(function (fulfill, reject) {
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                reject(err);
+            } else {
+                connection.query("CALL GetUsers();", function (err, resultsets) {
                     if (err) {
                         connection.release();
                         reject(err);
